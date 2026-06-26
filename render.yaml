@@ -38,7 +38,6 @@ services:
         source: /*
         destination: /index.html
 
-# 3. The PostgreSQL Database
 databases:
   - name: smartevent-db
     plan: free
