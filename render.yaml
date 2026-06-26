@@ -29,18 +29,20 @@ services:
         sync: false # Manually set this in Render's dashboard
 
   # 2. The React Frontend
-  - type: static
-    name: smartevent-frontend
-    # Tell Render to look inside the 'frontend' folder
-    rootDir: frontend
-    buildCommand: npm install && npm run build
-    # The output folder for Vite projects is 'dist'
-    publishDir: dist
-    # Rewrite all paths to /index.html for client-side routing
-    routes:
-      - type: rewrite
-        source: /*
-        destination: /index.html
+      # 2. The React Frontend
+      - type: web          # <--- Change 'static' to 'web'
+        name: smartevent-frontend
+        runtime: static    # <--- Add this line right here!
+        # Tell Render to look inside the 'frontend' folder
+        rootDir: frontend
+        buildCommand: npm install && npm run build
+        # The output folder for Vite projects is 'dist'
+        publishDir: dist
+        # Rewrite all paths to /index.html for client-side routing
+        routes:
+          - type: rewrite
+            source: /*
+            destination: /index.html
 
 # 3. The PostgreSQL Database (Moved to top-level indentation)
 databases:
