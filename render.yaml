@@ -1,0 +1,48 @@
+services:
+  # 1. The Spring Boot Backend
+  - type: web
+    name: smartevent-backend
+    env: java
+    # Tell Render to look inside the 'backend' folder
+    rootDir: backend
+    buildCommand: ./mvnw clean package -DskipTests
+    startCommand: java -jar target/eventai-0.0.1-SNAPSHOT.jar
+    envVars:
+      - key: DB_URL
+        # This will link to the PostgreSQL database you create on Render
+        fromDatabase:
+          name: smartevent-db
+          property: connectionString
+      - key: DB_USERNAME
+        fromDatabase:
+          name: smartevent-db
+          property: user
+      - key: DB_PASSWORD
+        fromDatabase:
+          name: smartevent-db
+          property: password
+      - key: OPENROUTER_API_KEY
+        sync: false # Manually set this in Render's dashboard
+      - key: MAIL_USERNAME
+        sync: false # Manually set this in Render's dashboard
+      - key: MAIL_PASSWORD
+        sync: false # Manually set this in Render's dashboard
+
+  # 2. The React Frontend
+  - type: static
+    name: smartevent-frontend
+    # Tell Render to look inside the 'frontend' folder
+    rootDir: frontend
+    buildCommand: npm install && npm run build
+    # The output folder for Vite projects is 'dist'
+    publishDir: dist
+    # Rewrite all paths to /index.html for client-side routing
+    routes:
+      - type: rewrite
+        source: /*
+        destination: /index.html
+
+# 3. The PostgreSQL Database (Moved to top-level indentation)
+databases:
+  - name: smartevent-db
+    plan: free
