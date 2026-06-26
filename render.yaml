@@ -32,7 +32,8 @@ services:
     runtime: static
     rootDir: frontend
     buildCommand: npm install && npm run build
-    publishDir: dist
+    # Fix: Render blueprint schema expects staticPublishPath
+    staticPublishPath: dist
     routes:
       - type: rewrite
         source: /*
