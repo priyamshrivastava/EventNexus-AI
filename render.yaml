@@ -20,11 +20,11 @@ services:
           name: smartevent-db
           property: password
       - key: OPENROUTER_API_KEY
-        value: 'REPLACE_ME_IN_DASHBOARD'
+        value: "PLACEHOLDER"
       - key: MAIL_USERNAME
-        value: 'REPLACE_ME_IN_DASHBOARD'
+        value: "PLACEHOLDER"
       - key: MAIL_PASSWORD
-        value: 'REPLACE_ME_IN_DASHBOARD'
+        value: "PLACEHOLDER"
 
   # 2. The React Frontend
   - type: web
