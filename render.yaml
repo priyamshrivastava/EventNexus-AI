@@ -1,11 +1,9 @@
 services:
-  # 1. The Spring Boot Backend
+  # 1. The Spring Boot Backend (Using Docker)
   - type: web
     name: smartevent-backend
-    env: java
+    runtime: docker
     rootDir: backend
-    buildCommand: ./mvnw clean package -DskipTests
-    startCommand: java -jar target/eventai-0.0.1-SNAPSHOT.jar
     envVars:
       - key: DB_URL
         fromDatabase:
@@ -29,7 +27,7 @@ services:
   # 2. The React Frontend
   - type: web
     name: smartevent-frontend
-    env: static
+    runtime: static
     rootDir: frontend
     buildCommand: npm install && npm run build
     staticPublishPath: dist
