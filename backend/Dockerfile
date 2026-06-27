@@ -2,21 +2,20 @@
 FROM maven:3.9.6-eclipse-temurin-17 AS build
 WORKDIR /app
 
-# Copy the dependency configurations first to lock them down
+# Copy dependency structures (Skipping the missing mvnw.cmd)
 COPY pom.xml .
 COPY .mvn .mvn
 COPY mvnw .
-COPY mvnw.cmd .
 
-# Ensure line endings are safe and force download dependencies
+# Fix script permissions and download dependencies
 RUN chmod +x mvnw
 RUN ./mvnw dependency:go-offline -B
 
-# Copy source and compile explicitly using the wrapper
+# Copy source code and compile
 COPY src ./src
 RUN ./mvnw clean package -DskipTests
 
-# Step 2: Run the application
+# Step 2: Run the application using an optimized JRE image
 FROM eclipse-temurin:17-jre
 WORKDIR /app
 COPY --from=build /app/target/eventai-0.0.1-SNAPSHOT.jar app.jar
