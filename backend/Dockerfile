@@ -1,19 +1,14 @@
-# Step 1: Build the application using Maven
+# Step 1: Build the application using standard Maven
 FROM maven:3.9.6-eclipse-temurin-17 AS build
 WORKDIR /app
 
-# Copy dependency structures (Skipping the missing mvnw.cmd)
+# Copy pom.xml and download dependencies natively
 COPY pom.xml .
-COPY .mvn .mvn
-COPY mvnw .
+RUN mvn dependency:go-offline -B
 
-# Fix script permissions and download dependencies
-RUN chmod +x mvnw
-RUN ./mvnw dependency:go-offline -B
-
-# Copy source code and compile
+# Copy the actual source files and compile
 COPY src ./src
-RUN ./mvnw clean package -DskipTests
+RUN mvn clean package -DskipTests
 
 # Step 2: Run the application using an optimized JRE image
 FROM eclipse-temurin:17-jre
