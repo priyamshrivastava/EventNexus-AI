@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from 'react';
 
+const API_BASE_URL = "https://smartevent-backend.onrender.com";
+
 const Auth = ({ onLogin }) => {
   const [isLogin, setIsLogin] = useState(true);
   
@@ -51,7 +53,7 @@ const Auth = ({ onLogin }) => {
     setOtpSuccessMsg('');
     
     try {
-      const res = await fetch('http://localhost:8080/api/auth/send-otp', {
+      const res = await fetch(`${API_BASE_URL}/api/auth/send-otp`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email })
@@ -76,7 +78,7 @@ const Auth = ({ onLogin }) => {
     setError('');
     
     try {
-      const res = await fetch('http://localhost:8080/api/auth/verify-otp', {
+      const res = await fetch(`${API_BASE_URL}/api/auth/verify-otp`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email, otp })
@@ -109,7 +111,7 @@ const Auth = ({ onLogin }) => {
     setError('');
 
     try {
-      const res = await fetch('http://localhost:8080/api/auth/signup', {
+      const res = await fetch(`${API_BASE_URL}/api/auth/signup`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email, username, password })
@@ -140,7 +142,7 @@ const Auth = ({ onLogin }) => {
     setError('');
 
     try {
-      const res = await fetch('http://localhost:8080/api/auth/login', {
+      const res = await fetch(`${API_BASE_URL}/api/auth/login`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ identifier, password: loginPassword })

@@ -1,5 +1,7 @@
 import React, { useState } from 'react';
 
+const API_BASE_URL = "https://smartevent-backend.onrender.com";
+
 const Dashboard = ({ user }) => {
   const [title, setTitle] = useState('');
   const [bulletPoints, setBulletPoints] = useState('');
@@ -18,7 +20,7 @@ const Dashboard = ({ user }) => {
     setLoading(true);
     setSaveStatus('');
     try {
-      const response = await fetch('http://localhost:8080/api/events/generate-description', {
+      const response = await fetch(`${API_BASE_URL}/api/events/generate-description`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ bulletPoints }),
@@ -41,7 +43,7 @@ const Dashboard = ({ user }) => {
   const handleSave = async () => {
     if (!title || !description) return;
     try {
-      const response = await fetch('http://localhost:8080/api/events/save', {
+      const response = await fetch(`${API_BASE_URL}/api/events/save`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ title, description }),
