@@ -15,6 +15,16 @@ const Dashboard = ({ user }) => {
     "CORPORATE FOUNDERS MIXER"
   ];
 
+  const getAuthHeaders = () => {
+    const headers = {
+      'Content-Type': 'application/json',
+    };
+    if (user && user.username && user.password) {
+      headers['Authorization'] = 'Basic ' + btoa(user.username + ":" + user.password);
+    }
+    return headers;
+  };
+
   const handleGenerate = async () => {
     if (!bulletPoints) return;
     setLoading(true);
@@ -22,10 +32,15 @@ const Dashboard = ({ user }) => {
     try {
       const response = await fetch(`${API_BASE_URL}/api/events/generate-description`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: getAuthHeaders(),
         body: JSON.stringify({ bulletPoints }),
       });
       
+      if (response.status === 401) {
+        alert("Authentication failed. Please log out and log back in.");
+        return;
+      }
+
       const data = await response.json();
       if (data.description) {
         setDescription(data.description);
@@ -45,12 +60,14 @@ const Dashboard = ({ user }) => {
     try {
       const response = await fetch(`${API_BASE_URL}/api/events/save`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: getAuthHeaders(),
         body: JSON.stringify({ title, description }),
       });
       if (response.ok) {
         setSaveStatus('Data committed to mainframe.');
         setTimeout(() => setSaveStatus(''), 3000);
+      } else {
+        alert("Failed to save. Please check your authentication.");
       }
     } catch (error) {
       setSaveStatus('Failed to write to database.');
@@ -60,7 +77,6 @@ const Dashboard = ({ user }) => {
   return (
     <div className="dashboard">
       
-      {/* New Beautiful Welcome Banner */}
       <div className="welcome-banner glass">
         <img 
           src="https://images.unsplash.com/photo-1540575467063-178a50c2df87?q=80&w=2000&auto=format&fit=crop" 
@@ -79,7 +95,6 @@ const Dashboard = ({ user }) => {
 
       <div className="generator-layout">
         
-        {/* INPUT PANEL */}
         <div className="panel glass">
           <div className="panel-header">
             <h3>📝 INPUT PARAMETERS</h3>
@@ -126,7 +141,6 @@ const Dashboard = ({ user }) => {
           </button>
         </div>
 
-        {/* OUTPUT PANEL */}
         <div className="panel glass">
           <div className="panel-header">
             <h3>✨ AI OUTPUT MATRIX</h3>

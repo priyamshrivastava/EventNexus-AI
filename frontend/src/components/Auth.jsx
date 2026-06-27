@@ -150,7 +150,7 @@ const Auth = ({ onLogin }) => {
       const data = await res.json();
 
       if (res.ok) {
-        onLogin({ username: data.username, email: data.email });
+        onLogin({ username: data.username, email: data.email, password: loginPassword });
       } else {
         setError(data.error || 'Invalid credentials');
       }

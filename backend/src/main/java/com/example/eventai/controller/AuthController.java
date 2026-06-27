@@ -6,6 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.HashMap;
@@ -19,14 +20,16 @@ import java.util.concurrent.ConcurrentHashMap;
 public class AuthController {
 
     private final UserRepository userRepository;
+    private final PasswordEncoder passwordEncoder;
     
     @Autowired
     private JavaMailSender mailSender;
     
     private final Map<String, String> otpStore = new ConcurrentHashMap<>();
 
-    public AuthController(UserRepository userRepository) {
+    public AuthController(UserRepository userRepository, PasswordEncoder passwordEncoder) {
         this.userRepository = userRepository;
+        this.passwordEncoder = passwordEncoder;
     }
 
     @PostMapping("/send-otp")
@@ -44,24 +47,26 @@ public class AuthController {
             return ResponseEntity.badRequest().body(response);
         }
 
-        // Generate 6 digit OTP
         String otp = String.format("%06d", new Random().nextInt(999999));
         otpStore.put(email, otp);
 
         try {
+            System.out.println("Received OTP request for: " + email);
             SimpleMailMessage message = new SimpleMailMessage();
             message.setFrom("priyamshrivastava0@gmail.com");
             message.setTo(email);
             message.setSubject("Your SmartEvent Nexus Verification Code");
-            message.setText("Welcome to SmartEvent Nexus!\n\nYour 6-digit verification code is: " + otp + "\n\nThis code will expire shortly. Do not share this code with anyone.\n\n- The SmartEvent AI Team");
+            message.setText("Welcome to SmartEvent Nexus!\n\nYour 6-digit verification code is: " + otp);
             
             mailSender.send(message);
             
+            System.out.println("Email sent successfully!");
             response.put("message", "OTP sent successfully to your email address!");
             return ResponseEntity.ok(response);
         } catch (Exception e) {
-            System.err.println("Error sending email: " + e.getMessage());
-            response.put("error", "Failed to send email. Ensure your Gmail App Password is correct.");
+            System.err.println("CRITICAL EMAIL ERROR THROWN: ");
+            e.printStackTrace();
+            response.put("error", "Failed to send email. " + e.getMessage());
             return ResponseEntity.status(500).body(response);
         }
     }
@@ -70,7 +75,6 @@ public class AuthController {
     public ResponseEntity<Map<String, Boolean>> verifyOtp(@RequestBody Map<String, String> request) {
         String email = request.get("email");
         String otp = request.get("otp");
-        
         Map<String, Boolean> response = new HashMap<>();
         
         if (otpStore.containsKey(email) && otpStore.get(email).equals(otp)) {
@@ -96,8 +100,9 @@ public class AuthController {
             return ResponseEntity.badRequest().body(response);
         }
 
+        user.setPassword(passwordEncoder.encode(user.getPassword()));
         userRepository.save(user);
-        otpStore.remove(user.getEmail()); // Clear OTP after successful registration
+        otpStore.remove(user.getEmail());
         
         response.put("message", "User created successfully");
         return ResponseEntity.ok(response);
@@ -105,9 +110,8 @@ public class AuthController {
 
     @PostMapping("/login")
     public ResponseEntity<Map<String, String>> login(@RequestBody Map<String, String> credentials) {
-        String identifier = credentials.get("identifier"); // Can be username or email
+        String identifier = credentials.get("identifier");
         String password = credentials.get("password");
-        
         Map<String, String> response = new HashMap<>();
         
         User existingUser = userRepository.findByUsername(identifier);
@@ -115,7 +119,7 @@ public class AuthController {
             existingUser = userRepository.findByEmail(identifier);
         }
         
-        if (existingUser != null && existingUser.getPassword().equals(password)) {
+        if (existingUser != null && passwordEncoder.matches(password, existingUser.getPassword())) {
             response.put("message", "Login successful");
             response.put("username", existingUser.getUsername());
             response.put("email", existingUser.getEmail());
